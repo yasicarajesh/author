@@ -1,17 +1,41 @@
 import React from 'react';
+import axios from 'axios';
 class Author extends React.Component {
+    constructor(props) {
+        super(props);
+        var imagesArray = [];
+        this.state = {
+            images: []
+        };
+        for(var i=1; i<=8; i++) {
+            imagesArray.push(axios.get('https://picsum.photos/id/' + (i*10) + '/info'))
+        }
+        Promise.all(imagesArray).then(function(res) {
+            this.setState({
+                images: res.map((response) => response.data)
+            });
+        }.bind(this))
+        .catch(function(err) {
+            console.log(err);
+        });
+    }
     render() {
+        var cards = this.state.images.map(function(item) {
+            return (
+                <div class="card" key={item.id}>
+                    <img src={item.download_url} class="card-image" alt="Image"/>
+                    <div class="author">{item.author}</div>
+                    <a role="button" href={item.download_url} target="_blank" rel="noopener noreferrer" class="download">Download</a>
+                </div>
+            );
+        });
         return (
             <> 
-
-            <div class="row">
-            <div class="col-xs-12 col-sm-offset-3 col-sm-6">
-                <div class="panel panel-default">
-                <div class="panel-heading c-list">
-                <img src="auth/MayPamintuan.jpg" class="team"/>
-                </div></div></div></div>
-                </>
-                );
+                <section aria-label="Image Card Container" class="image-cards-container">
+                    {cards}
+                </section>
+            </>
+            );
         }
     }
     export default Author;
